@@ -602,7 +602,10 @@ Returns a function/closure to invoke the necessary buffer operations to perform 
                            (s-split ",") (-map 's-trim)
                            (cons qualified-class-name) (-sort 's-less?) (s-join ", "))))
     (lambda ()
-      (if (equal (point) (point-max)) (newline) (forward-char 1))
+      (cond
+        ((equal (point) (point-max)) (newline))
+        ; if the import statement is at point-min we can't be above it and are actually at point-at-bol
+        ((equal (point) (point-at-eol)) (forward-char 1)))
       (kill-line)
       (->> (ensime-scala-new-import-grouped-package base-package new-imports)
            insert save-excursion)
