@@ -12,6 +12,3 @@ pipeline:
       - cask exec ecukes ;
       - cd test/example ; sbt ensimeConfig ; cd ../.. ;
       - test/run_emacs_tests.sh || test/run_emacs_tests.sh ;
-        if [ -n "$UNDERCOVER" ] && [ -f "coveralls.json" ] ; then
-          curl -v -include --form json_file=@coveralls.json https://coveralls.io/api/v1/jobs || true ;
-        fi
