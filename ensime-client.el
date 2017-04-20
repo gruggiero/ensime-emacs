@@ -157,10 +157,10 @@ overrides `ensime-buffer-connection'.")
   "Returns proc if proc's buffer is alive and proc has not exited,
  otherwise nil."
   (when (and proc
-	     (buffer-live-p (process-buffer proc))
-	     (let ((status (process-status proc)))
-	       (and (not (eq status 'exit))
-		    (not (null status)))))
+       (buffer-live-p (process-buffer proc))
+       (let ((status (process-status proc)))
+         (and (not (eq status 'exit))
+        (not (null status)))))
     proc))
 
 (defun ensime-conn-if-alive (conn)
@@ -172,8 +172,8 @@ overrides `ensime-buffer-connection'.")
   "Return t if there is a valid, active connection."
   (let ((conn (or conn (ensime-connection-or-nil))))
     (and conn
-	 (buffer-live-p (process-buffer conn))
-	 (eq (process-status conn) 'open))))
+   (buffer-live-p (process-buffer conn))
+   (eq (process-status conn) 'open))))
 
 (defun ensime-connection ()
   "Return the connection to use for Lisp interaction.
@@ -210,7 +210,7 @@ overrides `ensime-buffer-connection'.")
    (lambda (proc)
      (-when-let (good-proc (ensime-proc-if-alive proc))
        (ensime-config-includes-source-file
-	(process-get good-proc :ensime-config) source-file)))
+  (process-get good-proc :ensime-config) source-file)))
    ensime-server-processes))
 
 (defun ensime-owning-connection-for-source-file (source-file)
@@ -219,8 +219,8 @@ overrides `ensime-buffer-connection'.")
     (-find
      (lambda (conn)
        (-when-let (good-conn (ensime-conn-if-alive conn))
-	 (ensime-config-includes-source-file
-	  (ensime-config good-conn) source-file)))
+   (ensime-config-includes-source-file
+    (ensime-config good-conn) source-file)))
      ensime-net-processes))
 
 (defun ensime-owning-connection-for-rootdir (dir)
@@ -235,7 +235,7 @@ overrides `ensime-buffer-connection'.")
        (let* ((config (ensime-config good-conn))
               (root-dir (plist-get config :root-dir)))
          (string= (file-name-as-directory root-dir)
-		  (file-name-as-directory (expand-file-name dir))))))
+      (file-name-as-directory (expand-file-name dir))))))
    ensime-net-processes))
 
 (defun ensime-interrupt-all-servers ()
@@ -319,8 +319,8 @@ This doesn't mean it will connect right after Ensime is loaded."
   (interactive (list
         (read-from-minibuffer "Host: " "127.0.0.1")
         (read-from-minibuffer "Port: " nil nil t)
-	(and ensime-net-processes
-	     (y-or-n-p "Close old connections first? "))))
+  (and ensime-net-processes
+       (y-or-n-p "Close old connections first? "))))
   (when disconnect
     (ensime-disconnect-all))
   (message "Connecting to Swank on port %S.." port)
@@ -338,10 +338,10 @@ This doesn't mean it will connect right after Ensime is loaded."
     (setf (ensime-protocol-version) version)
     (destructuring-bind (&key name) implementation
       (setf (ensime-server-implementation-name) name
-	    (ensime-connection-name)
-	    (ensime-generate-connection-name name))))
+      (ensime-connection-name)
+      (ensime-generate-connection-name name))))
   (message "Connected to ENSIME speaking protocol %s, please wait while the project is loaded."
-	   (ensime-protocol-version))
+     (ensime-protocol-version))
   (ensime-event-sig :connected info))
 
 ;;;;; Connection listing
@@ -373,34 +373,34 @@ This doesn't mean it will connect right after Ensime is loaded."
   "Display a list of all connections."
   (interactive)
   (let ((pos (point))
-	(inhibit-read-only t))
+  (inhibit-read-only t))
     (erase-buffer)
     (ensime-draw-connection-list)
     (goto-char pos)))
 
 (defun ensime-draw-connection-list ()
   (let ((default-pos nil)
-	(fstring "%s%2s  %-10s  %-17s  %-7s\n"))
+  (fstring "%s%2s  %-10s  %-17s  %-7s\n"))
     (insert (format fstring " " "Nr" "Name" "Port" "Pid")
-	    (format fstring " " "--" "----" "----" "---"))
+      (format fstring " " "--" "----" "----" "---"))
     (dolist (p (reverse ensime-net-processes))
       (ensime-insert-propertized
        (list 'ensime-connection p)
        (format fstring
-	       " "
-	       (ensime-connection-number p)
-	       (ensime-connection-name p)
-	       (or (process-id p) (process-contact p))
-	       (ensime-pid p))))))
+         " "
+         (ensime-connection-number p)
+         (ensime-connection-name p)
+         (or (process-id p) (process-contact p))
+         (ensime-pid p))))))
 
 
 
 (defun ensime-generate-connection-name (server-name)
   (loop for i from 1
-	for name = server-name then (format "%s<%d>" server-name i)
-	while (cl-find name ensime-net-processes
-		    :key #'ensime-connection-name :test #'equal)
-	finally (return name)))
+  for name = server-name then (format "%s<%d>" server-name i)
+  while (cl-find name ensime-net-processes
+        :key #'ensime-connection-name :test #'equal)
+  finally (return name)))
 
 
 ;;;;; Commands on connections
@@ -436,8 +436,8 @@ This doesn't mean it will connect right after Ensime is loaded."
 (defun ensime-net-connect (host port)
   "Establish a connection with a CL."
   (let* ((inhibit-quit nil)
-	 (proc (open-network-stream "ENSIME Scala" nil host port))
-	 (buffer (ensime-make-net-buffer " *ensime-connection*")))
+   (proc (open-network-stream "ENSIME Scala" nil host port))
+   (buffer (ensime-make-net-buffer " *ensime-connection*")))
     (push proc ensime-net-processes)
     (set-process-buffer proc buffer)
     (set-process-filter proc 'ensime-net-filter)
@@ -454,8 +454,8 @@ This doesn't mean it will connect right after Ensime is loaded."
   (when ensime-kill-without-query-p
     ;; avoid byte-compiler warnings
     (let ((fun (if (fboundp 'set-process-query-on-exit-flag)
-		   'set-process-query-on-exit-flag
-		 'process-kill-without-query)))
+       'set-process-query-on-exit-flag
+     'process-kill-without-query)))
       (funcall fun process nil))))
 
 (defun ensime-make-net-buffer (name)
@@ -507,27 +507,27 @@ This doesn't mean it will connect right after Ensime is loaded."
   "Process all complete messages that have arrived from Lisp."
   (with-current-buffer (process-buffer process)
     (while (and
-	    (buffer-live-p (process-buffer process))
-	    (ensime-net-have-input-p))
+      (buffer-live-p (process-buffer process))
+      (ensime-net-have-input-p))
       (let ((event (ensime-net-read-or-lose process))
-	    (ok nil))
+      (ok nil))
         (when ensime--debug-messages (message "<-- %s" event))
-	(when ensime-log-events
-	  (ensime-log-event event))
-	(unwind-protect
-	    (save-current-buffer
-	      (ensime-dispatch-event event process)
-	      (setq ok t))
-	  (unless ok
-	    (ensime-run-when-idle
-	     'ensime-process-available-input process)))))))
+  (when ensime-log-events
+    (ensime-log-event event))
+  (unwind-protect
+      (save-current-buffer
+        (ensime-dispatch-event event process)
+        (setq ok t))
+    (unless ok
+      (ensime-run-when-idle
+       'ensime-process-available-input process)))))))
 
 (defun ensime-net-have-input-p ()
   "Return true if a complete message is available."
   (goto-char (point-min))
   (and (>= (ensime-buffer-size-in-bytes) 6)
        (>= (- (ensime-buffer-size-in-bytes) 6)
-	   (ensime-net-decode-length))))
+     (ensime-net-decode-length))))
 
 (defun ensime-buffer-size-in-bytes ()
   (- (position-bytes (point-max)) 1))
@@ -535,8 +535,8 @@ This doesn't mean it will connect right after Ensime is loaded."
 (defun ensime-run-when-idle (function &rest args)
   "Call FUNCTION as soon as Emacs is idle."
   (apply #'run-at-time
-	 (if (featurep 'xemacs) itimer-short-interval 0)
-	 nil function args))
+   (if (featurep 'xemacs) itimer-short-interval 0)
+   nil function args))
 
 (defun ensime-net-read-or-lose (process)
   (condition-case error
@@ -550,13 +550,13 @@ This doesn't mean it will connect right after Ensime is loaded."
   "Read a message from the network buffer."
   (goto-char (point-min))
   (let* ((length (ensime-net-decode-length))
-	 (start (+ 6 (point)))
-	 (end (+ start length)))
+   (start (+ 6 (point)))
+   (end (+ start length)))
     (assert (plusp length))
     (goto-char (byte-to-position start))
     (prog1 (read (current-buffer))
       (delete-region (- (byte-to-position start) 6)
-		     (byte-to-position end)))
+         (byte-to-position end)))
     ))
 
 
@@ -575,9 +575,9 @@ This doesn't mean it will connect right after Ensime is loaded."
 This is more compatible with the CL reader."
   (with-temp-buffer
     (let (print-escape-nonascii
-	  print-escape-newlines
-	  print-length
-	  print-level)
+    print-escape-newlines
+    print-length
+    print-level)
       (prin1 sexp (current-buffer))
       (buffer-string))))
 
@@ -601,14 +601,14 @@ This is more compatible with the CL reader."
   "Return or create the event log buffer."
   (or (get-buffer ensime-event-buffer-name)
       (let ((buffer (get-buffer-create ensime-event-buffer-name)))
-	(with-current-buffer buffer
-	  (buffer-disable-undo)
-	  (set (make-local-variable 'outline-regexp) "^(")
-	  (set (make-local-variable 'comment-start) ";")
-	  (set (make-local-variable 'comment-end) "")
-	  (when ensime-outline-mode-in-events-buffer
-	    (outline-minor-mode)))
-	buffer)))
+  (with-current-buffer buffer
+    (buffer-disable-undo)
+    (set (make-local-variable 'outline-regexp) "^(")
+    (set (make-local-variable 'comment-start) ";")
+    (set (make-local-variable 'comment-end) "")
+    (when ensime-outline-mode-in-events-buffer
+      (outline-minor-mode)))
+  buffer)))
 
 (defun ensime-copy-event-for-print (event)
   "Return a mostly-deep-copy of EVENT, with long strings trimmed. Lists are
@@ -636,7 +636,7 @@ copies. All other objects are used unchanged. List must not contain cycles."
 (defun ensime-dispatch-event (event &optional process)
   (let ((ensime-dispatching-connection (or process (ensime-connection))))
     (or (run-hook-with-args-until-success 'ensime-event-hooks event)
-	(destructure-case event
+  (destructure-case event
                           ((:swank-rpc form continuation)
                            (let ((id (incf (ensime-continuation-counter))))
                              (when (fboundp 'ensime--send-event-handler)
@@ -726,7 +726,7 @@ copies. All other objects are used unchanged. List must not contain cycles."
                                            code detail))
                             (goto-char (point-min)))
                            (error "Invalid protocol message"))
-			  
+
                           ))))
 
 (defun ensime-send (sexp)
@@ -746,8 +746,8 @@ copies. All other objects are used unchanged. List must not contain cycles."
 
 (defun ensime-user-first-name ()
   (let ((name (if (string= (user-full-name) "")
-		  (user-login-name)
-		(user-full-name))))
+      (user-login-name)
+    (user-full-name))))
     (string-match "^[^ ]*" name)
     (capitalize (match-string 0 name))))
 
@@ -759,7 +759,7 @@ copies. All other objects are used unchanged. List must not contain cycles."
     "Death to null!"
     "Find closure!"
     "Is it a bird? is it a plane? No, it's Lambda Man!"
-    "Let's flatMap this thing and go home!"
+    "Let's flatMap this thing and go home! (or go shopping if you work from home!)"
     "A monad is just a monoid in the category of endofunctors."
     "rm -rf *SingletonFactoryBean"
     "Join us now and share the software, you'll be free."
@@ -951,7 +951,7 @@ copies. All other objects are used unchanged. List must not contain cycles."
 
 (defun ensime-rpc-async-typecheck-buffer (continue)
   (ensime-eval-async `(swank:typecheck-file
-		       ,(ensime-src-info-for-current-buffer)) continue))
+           ,(ensime-src-info-for-current-buffer)) continue))
 
 (defun ensime-rpc-async-typecheck-all (continue)
   (ensime-eval-async `(swank:typecheck-all) continue))
@@ -959,9 +959,9 @@ copies. All other objects are used unchanged. List must not contain cycles."
 (defun ensime-rpc-expand-selection (file-name start end)
   (ensime-internalize-offset-fields
    (ensime-eval `(swank:expand-selection
-		  ,file-name
-		  ,(ensime-externalize-offset start)
-		  ,(ensime-externalize-offset end)))
+      ,file-name
+      ,(ensime-externalize-offset start)
+      ,(ensime-externalize-offset end)))
    :start
    :end
    ))
@@ -1074,12 +1074,12 @@ copies. All other objects are used unchanged. List must not contain cycles."
 
 (defun ensime-rpc-async-symbol-designations (file start end requested-types continue)
   (ensime-eval-async `(swank:symbol-designations ,file ,start ,end ,requested-types)
-		     continue))
+         continue))
 
 (defun ensime-rpc-async-symbol-designations-for-buffer (start end requested-types continue)
   (let ((file (ensime-src-info-for-current-buffer)))
     (ensime-eval-async `(swank:symbol-designations ,file ,start ,end ,requested-types)
-		       continue)))
+           continue)))
 
 (defun ensime-rpc-implicit-info-in-range (start end)
   (ensime-eval `(swank:implicit-info
