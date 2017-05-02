@@ -30,6 +30,8 @@
 (require 'ensime-stacktrace)
 (require 'ensime-debug)
 (require 'ensime-editor)
+(require 'ensime-company)
+(require 'ensime-eldoc)
 (require 'ensime-goto-testfile)
 (require 'ensime-inspector)
 (require 'ensime-model)
@@ -319,6 +321,9 @@
           (define-key ensime-mode-map [mouse-movement] 'ensime-mouse-motion))
 
         (ensime-refresh-all-note-overlays)
+
+        (when ensime-eldoc-hints
+          (setq-local eldoc-documentation-function 'ensime-eldoc-info))
 
 	(when (equal major-mode 'scala-mode)
 	  (ensime--setup-imenu)))
