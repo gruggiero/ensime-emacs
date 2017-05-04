@@ -46,7 +46,7 @@
   :type 'boolean
   :group 'ensime-ui)
 
-(defcustom ensime-eldoc-hints 'all
+(defcustom ensime-eldoc-hints nil
   "If non-nil, eldoc hints are activated.
 It can be set to 'all, 'error, 'implicit or 'type to limit the type of hints shown"
   :type 'symbol
