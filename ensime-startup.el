@@ -36,8 +36,7 @@ It is important that users know what they are getting into.")
 (defun ensime-startup-notifications ()
   "Invasive informational messages that users need to be aware of."
 
-  (when (and ensime-startup-snapshot-notification
-             (s-contains? "SNAPSHOT" ensime-server-version))
+  (when ensime-startup-snapshot-notification
     (let ((developer (generate-new-buffer "*ENSIME Developer Edition*")))
       (with-current-buffer developer
         (insert
@@ -149,7 +148,7 @@ that you have read this message.")
               "See http://ensime.org/editors/emacs/install\n\n")))
 
     ;; not relevant for stable releases
-    (unless (ensime-dev-version-p ensime-server-version) 
+    (unless (ensime-dev-version-p ensime-server-version)
       (error (concat
               "\n\n"
               "Your build tool has downloaded the stable version of ENSIME "
