@@ -611,58 +611,6 @@
       (ensime-test-cleanup proj))))
 
    (ensime-async-test
-    "Test inspect type at point."
-    (let* ((proj (ensime-create-tmp-project
-                  `((:name
-                     "test.scala"
-                     :contents ,(ensime-test-concat-lines
-                                 "package pack.a"
-                                 "class A(value:/*1*/String){"
-                                 "}"))))))
-      (ensime-test-init-proj proj))
-
-    ((:connected))
-    ((:compiler-ready :indexer-ready :full-typecheck-finished)
-     (ensime-test-with-proj
-      (proj src-files)
-      (find-file (car src-files))
-      (goto-char (ensime-test-after-label "1"))
-      (let* ((info (ensime-rpc-inspect-type-at-point)))
-        (ensime-assert (not (null info)))
-        (ensime-assert-equal (plist-get (plist-get info :type) :name) "String"))
-      (ensime-test-cleanup proj))))
-
-   (ensime-async-test
-    "Test inspect type in range."
-    (let* ((proj (ensime-create-tmp-project
-                  `((:name
-                     "test.scala"
-                     :contents ,(ensime-test-concat-lines
-                                 "package pack.a"
-                                 "class A {"
-                                 " def foo = {"
-                                 "  /*1*/this bar 2"
-                                 "  val x = 10"
-                                 " }"
-                                 " def bar(i:Int) = \"dlkjf\""
-                                 "}"))))))
-      (ensime-test-init-proj proj))
-
-    ((:connected))
-    ((:compiler-ready :indexer-ready :full-typecheck-finished)
-     (ensime-test-with-proj
-      (proj src-files)
-      (find-file (car src-files))
-      (goto-char (ensime-test-after-label "1"))
-      (let ((info (ensime-rpc-inspect-type-at-range
-                   (list (ensime-externalize-offset (point))
-                         (ensime-externalize-offset (point-at-eol))))))
-        (ensime-assert (not (null info)))
-        (ensime-assert-equal
-         (plist-get (plist-get info :type) :name) "String"))
-      (ensime-test-cleanup proj))))
-
-   (ensime-async-test
     "Test completing members."
     (let* ((proj (ensime-create-tmp-project
                   `((:name
@@ -1236,26 +1184,6 @@
    ;;    (let* ((notes (ensime-all-notes)))
    ;;      (ensime-assert (> (length notes) 0)))
    ;;    (ensime-test-cleanup proj))))
-
-   (ensime-async-test
-    "Get package info for com.helloworld."
-    (let* ((proj (ensime-create-tmp-project
-                  ensime-tmp-project-hello-world)))
-      (ensime-test-init-proj proj))
-
-    ((:connected))
-    ((:compiler-ready :full-typecheck-finished)
-     (ensime-test-with-proj
-      (proj src-files)
-      (let ((info (ensime-rpc-inspect-package-by-path
-                   "com.helloworld")))
-        (ensime-assert (not (null info)))
-        (ensime-assert-equal
-         (ensime-package-full-name info) "com.helloworld")
-        ;; Should be one class, one object
-        (ensime-assert-equal
-         2 (length (ensime-package-members info))))
-      (ensime-test-cleanup proj))))
 
    (ensime-async-test
     "Verify re-typecheck on save-buffer."

@@ -22,7 +22,6 @@
 
 (defvar ensime-compile-result-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "g") 'ensime-show-all-errors-and-warnings)
     (define-key map (kbd "TAB") 'forward-button)
     (define-key map (kbd "<backtab>") 'backward-button)
     (define-key map (kbd "M-n") 'forward-button)
@@ -385,62 +384,6 @@ Goes to the point of the definition of the type."
         (with-current-buffer (get-file-buffer effective-file)
           (setq buffer-read-only t))))))
 
-;; Compilation result interface
-
-(defun ensime-show-compile-result-buffer (notes-in)
-  "Show a popup listing the results of the last build."
-
-  (ensime-with-popup-buffer
-   (ensime-compile-result-buffer-name t t)
-   (use-local-map ensime-compile-result-map)
-   (ensime-insert-with-face
-    "Latest Compilation Results (q to quit, g to refresh, TAB to jump to next error)"
-    'font-lock-constant-face)
-   (if (null notes-in)
-       (insert "\n0 errors, 0 warnings.")
-     (save-excursion
-
-       ;; Group notes by their file and sort by
-       ;; position in the buffer.
-       (let ((notes-by-file (make-hash-table :test 'equal)))
-	 (dolist (note notes-in)
-	   (let* ((f (ensime-note-file note))
-		  (existing (gethash f notes-by-file)))
-	     (puthash f (cons note existing) notes-by-file)))
-	 (maphash (lambda (file-heading notes-set)
-		    (let ((notes (sort (copy-list notes-set)
-				       (lambda (a b) (< (ensime-note-beg a)
-							(ensime-note-beg b))))))
-
-		      ;; Output file heading
-		      (ensime-insert-with-face
-		       (concat "\n" file-heading "\n")
-		       'font-lock-comment-face)
-
-		      ;; Output the notes
-		      (dolist (note notes)
-			(destructuring-bind
-			    (&key severity msg beg
-				  end line col file &allow-other-keys) note
-			  (let ((face (case severity
-					(error 'ensime-compile-errline)
-					(warn 'ensime-compile-warnline)
-					(info font-lock-string-face)
-					(otherwise font-lock-comment-face)))
-				(header (case severity
-					  (error "ERROR")
-					  (warn "WARNING")
-					  (info "INFO")
-					  (otherwise "MISC")))
-				(p (point)))
-			    (insert (format "%s: %s : line %s"
-					    header msg line))
-			    (ensime-make-code-link p (point) file beg face)))
-			(insert "\n"))))
-		  notes-by-file)))
-     (forward-button 1))))
-
-
 ;; Compilation on request
 
 (defun ensime-typecheck-current-buffer ()
@@ -459,14 +402,6 @@ Goes to the point of the definition of the type."
 the Scala files that are currently open in emacs."
   (interactive)
   (ensime-rpc-restart-scala-compiler))
-
-(defun ensime-show-all-errors-and-warnings ()
-  "Show a summary of all compilation notes."
-  (interactive)
-  (let ((notes
-         (append (ensime-java-compiler-notes (ensime-connection))
-                 (ensime-scala-compiler-notes (ensime-connection)))))
-    (ensime-show-compile-result-buffer notes)))
 
 (defun ensime-sym-at-point (&optional point)
   "Return information about the symbol at point, using the an RPC request.
@@ -944,6 +879,32 @@ Use build tools tasks appropriately"
      (goto-char (point-min))
      (when uses (forward-button 1)))
     (ensime-event-sig :references-buffer-shown)))
+
+
+(defun ensime-type-at-point (&optional arg use-full-name)
+  "Echo the type at point to the minibuffer.
+A prefix argument will add the type to the kill ring.
+If additional parameter use-full-name is provided it'll use type fullname"
+  (interactive "P")
+  (let* ((type (ensime-rpc-get-type-at-point))
+         (type-name (if use-full-name
+                        (ensime-type-full-name-with-args type)
+                      (ensime-type-name-with-args type))))
+    (when  (equal arg '(4))
+      (kill-new type-name))
+    (when (equal arg '(16))
+      (ensime--make-result-overlay
+          (format "%S" type-name)
+        :where (point)
+        :duration 'command))
+    (message type-name)))
+
+(defun ensime-type-at-point-full-name (&optional arg)
+  "Echo the full type name at point to the minibuffer.
+A prefix argument will add the type to the kill ring."
+  (interactive "P")
+  (ensime-type-at-point arg t))
+
 
 (provide 'ensime-editor)
 

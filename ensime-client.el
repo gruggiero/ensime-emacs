@@ -90,9 +90,6 @@ This is automatically synchronized from Lisp.")
 (ensime-def-connection-var ensime-java-compiler-notes nil
   "Warnings, Errors, and other notes produced by the analyzer.")
 
-(ensime-def-connection-var ensime-awaiting-full-typecheck nil
-  "Should we show the errors and warnings report on next full-typecheck event?")
-
 (ensime-def-connection-var ensime-num-errors 0
   "Current number of errors in project.")
 
@@ -655,11 +652,6 @@ copies. All other objects are used unchanged. List must not contain cycles."
 
 
                           ((:full-typecheck-finished)
-                           (when (ensime-awaiting-full-typecheck (ensime-connection))
-                             (message "Typecheck finished.")
-                             (setf (ensime-awaiting-full-typecheck
-                                    (ensime-connection)) nil)
-                             (ensime-show-all-errors-and-warnings))
                            (ensime-event-sig :full-typecheck-finished t))
 
                           ((:compiler-ready)
@@ -1018,28 +1010,6 @@ copies. All other objects are used unchanged. List must not contain cycles."
 (defun ensime-rpc-get-type-at-point ()
   (ensime-eval
    `(swank:type-at-point ,(buffer-file-name-with-indirect) ,(ensime-computed-point))))
-
-(defun ensime-rpc-inspect-type-at-point ()
-  (ensime-eval
-   `(swank:inspect-type-at-point ,buffer-file-name ,(ensime-computed-point))))
-
-(defun ensime-rpc-inspect-type-at-range (&optional range)
-  (ensime-eval
-   `(swank:inspect-type-at-point ,(buffer-file-name-with-indirect)
-                                 ,(or range (ensime-computed-range)))))
-
-(defun ensime-rpc-inspect-type-by-id (id)
-  (if (and (integerp id) (> id -1))
-      (ensime-eval
-       `(swank:inspect-type-by-id ,id))))
-
-(defun ensime-rpc-inspect-type-by-name (name)
-  (ensime-eval
-   `(swank:inspect-type-by-name ,name)))
-
-(defun ensime-rpc-inspect-package-by-path (path)
-  (ensime-eval
-   `(swank:inspect-package-by-path ,path)))
 
 (defun ensime-rpc-peek-undo ()
   (ensime-eval

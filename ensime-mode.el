@@ -78,8 +78,7 @@
 
       (define-key prefix-map (kbd "C-c c") 'ensime-typecheck-current-buffer)
       (define-key prefix-map (kbd "C-c r") 'ensime-reload-open-files)
-      (define-key prefix-map (kbd "C-c e") 'ensime-show-all-errors-and-warnings)
-
+      
       (define-key prefix-map (kbd "C-t t") 'ensime-goto-test)
       (define-key prefix-map (kbd "C-t i") 'ensime-goto-impl)
 
@@ -192,8 +191,7 @@
 
     ("Typecheck"
      ["Typecheck file" ensime-typecheck-current-buffer]
-     ["Reload typechecker" ensime-reload-open-files]
-     ["Show all errors and warnings" ensime-show-all-errors-and-warnings])
+     ["Reload typechecker" ensime-reload-open-files])
 
     ("Refactor"
      ["Add type annotation" (ensime-refactor-add-type-annotation)]
